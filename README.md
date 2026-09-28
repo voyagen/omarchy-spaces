@@ -91,7 +91,7 @@ Workspace numbers 1–10 display as 一 二 三 四 五 六 七 八 九 十. The
 
 Install Ollama and download `qwen3:1.7b` once with `ollama pull qwen3:1.7b`. In Spaces settings, turn on **Contextual workspace names** (off by default). Occupied workspaces show **Chinese numeral → app icons → name**, such as `一 [icons] Game Development`. Empty workspaces keep their numerals.
 
-The widget first shows a broad category inferred from installed app names. Local Ollama then uses window titles to replace it with a more specific 2–5-word activity or topic when the titles contain useful context. If Ollama is unavailable or returns an invalid name, the broad category remains; otherwise only the numeral is shown.
+The widget first shows a broad category inferred from installed app names. Local Ollama then uses window titles to replace it with a more specific activity or topic when the titles contain useful context. When a browser and an OMP/Herdr terminal share a workspace, it requests separate browser and terminal topics and joins them, such as `AI News + Screen Context`, instead of naming only the browser. If Ollama is unavailable or returns an invalid name, the broad category remains; otherwise only the numeral is shown.
 
 | Applications (when titles are vague) | Fallback name |
 | --- | --- |

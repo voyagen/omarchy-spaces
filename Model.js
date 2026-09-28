@@ -224,6 +224,30 @@ function parseWorkspaceName(text) {
   }
 }
 
+function parseMixedWorkspaceName(text) {
+  try {
+    var topics = JSON.parse(text)
+    function shortTopic(value) {
+      if (typeof value !== "string") return ""
+      var topic = value.replace(/[\r\n]+/g, " ").replace(/^[\s"'`]+|[\s"'`.!]+$/g, "")
+        .split(/\s+/).slice(0, 4).join(" ").slice(0, 24).trim()
+      return /^(browser|terminal|workspace|x11|omp|herdr|youtube)$/i.test(topic) ? "" : topic
+    }
+    var browser = shortTopic(topics.browserTopic)
+    var terminal = shortTopic(topics.terminalTopic)
+    if (!browser || !terminal) return ""
+    if (browser.toLowerCase() === terminal.toLowerCase()) return browser
+    while (browser.length + terminal.length + 3 > 36) {
+      if (terminal.includes(" ")) terminal = terminal.slice(0, terminal.lastIndexOf(" "))
+      else if (browser.includes(" ")) browser = browser.slice(0, browser.lastIndexOf(" "))
+      else return ""
+    }
+    return browser + " + " + terminal
+  } catch (error) {
+    return ""
+  }
+}
+
 function contextName(fallback, proposed) {
   if (!proposed || /^(browser|terminal|workspace|x11)$/i.test(proposed))
     return fallback || (/^(browser|terminal)$/i.test(proposed) ? proposed : "")
@@ -478,6 +502,7 @@ if (typeof module !== "undefined") {
     workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceApps: workspaceApps,
     workspaceTitle: workspaceTitle, workspaceSignature: workspaceSignature,
     categoryForApps: categoryForApps, parseWorkspaceName: parseWorkspaceName,
+    parseMixedWorkspaceName: parseMixedWorkspaceName,
     contextName: contextName,
     appKey: appKey,
     sortWindows: sortWindows, iconItems: iconItems, truncate: truncate,

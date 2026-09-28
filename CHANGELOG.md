@@ -8,6 +8,7 @@
 - Added opt-in local Ollama naming for occupied workspaces, with numeral fallback.
 - Contextual workspace names now use titles to describe the topic beyond broad app categories, with short model output and an app-based fallback.
 - Enriches local Ollama context with running OMP/Herdr task and project metadata from terminals.
+- Mixed browser and OMP/Herdr workspaces now combine separate browser and agent topics instead of dropping the terminal activity.
 
 ## 1.0.0
 

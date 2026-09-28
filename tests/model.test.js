@@ -80,6 +80,18 @@ test("contextual names keep topic detail but reject invalid or overlong response
   assert.strictEqual(M.parseWorkspaceName('nonsense'), "")
 })
 
+test("mixed browser and agent topics both survive a short bar label", () => {
+  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"AI News","terminalTopic":"Screen Context"}'),
+    "AI News + Screen Context")
+  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"AI News","terminalTopic":"Add Screen Context"}'),
+    "AI News + Add Screen Context")
+  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"AI News","terminalTopic":"AI News"}'), "AI News")
+  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"Browser","terminalTopic":"Screen Context"}'), "")
+  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"YouTube","terminalTopic":"Screen Context"}'), "")
+  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"AI News","terminalTopic":42}'), "")
+  assert.strictEqual(M.parseMixedWorkspaceName('invalid'), "")
+})
+
 test("generic model names fall back to the known app category", () => {
   assert.strictEqual(M.contextName("Browser", "Game Development"), "Game Development")
   assert.strictEqual(M.contextName("Browser", "Terminal"), "Browser")
