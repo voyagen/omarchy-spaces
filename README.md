@@ -91,22 +91,23 @@ Workspace numbers 1–10 display as 一 二 三 四 五 六 七 八 九 十. The
 
 Install Ollama and download `qwen3:1.7b` once with `ollama pull qwen3:1.7b`. In Spaces settings, turn on **Contextual workspace names** (off by default). Occupied workspaces show **Chinese numeral → app icons → name**, such as `一 [icons] Game Development`. Empty workspaces keep their numerals.
 
-The widget first shows a broad category inferred from installed app names. Local Ollama then uses window titles to replace it with a more specific activity or topic when the titles contain useful context. When a browser and an OMP/Herdr terminal share a workspace, it requests separate browser and terminal topics and joins them, such as `AI News + Screen Context`, instead of naming only the browser. If Ollama is unavailable or returns an invalid name, the broad category remains; otherwise only the numeral is shown.
+The widget starts with a category for each open app. Local Ollama names each distinct activity separately, then the bar shows two distinct topics and `+N` for any others (for example, `AI News + Screen Context +1`). Duplicate topics collapse. It retains the short app categories when Ollama is unavailable or returns an invalid name; empty workspaces keep their numerals.
 
-| Applications (when titles are vague) | Fallback name |
+| Application (when its title is vague) | Fallback topic |
 | --- | --- |
-| VS Code or Neovim + Alacritty/Foot | Development |
-| Chrome or Chromium + terminal | Browser |
-| Spotify or cliamp + browser | Music |
-| mpv, IPTVnator, or YouTube + browser | Movie |
-| Discord, WhatsApp, or Zoom + browser | Chat |
+| VS Code or Neovim | Development |
+| Chrome or Chromium | Browser |
+| Alacritty or Foot | Terminal |
+| Spotify or cliamp | Music |
+| mpv, IPTVnator, or YouTube | Movie |
+| Discord, WhatsApp, or Zoom | Chat |
 | Steam, Counter-Strike 2, or Moonlight | Gaming |
 | ComfyUI or Pinta | Design |
 | Obsidian or LibreOffice Writer | Writing |
 
-The widget sends the application names and titles of up to eight windows per workspace to Ollama at `127.0.0.1:11434`. Meaningful title changes may update the name; animated terminal-title spinners are ignored. Titles can contain private document names or messages, so only turn this on if you are comfortable sending them to your **local** Ollama server. Nothing is sent to a hosted AI service. Names stay in memory, not in `shell.json`; turning the switch off restores the Chinese numerals. This uses window metadata, not a screenshot: if the title is just “YouTube,” the widget cannot tell which video is playing.
+Each distinct activity with a meaningful title sends its application name and normalized title or agent task to Ollama at `127.0.0.1:11434`; there is no eight-window cutoff. Results are cached in memory. Unread counters, animated terminal spinners, and Spotify track titles do not trigger renaming; meaningful browser video or document title changes still do. Titles can contain private document names or messages, so only turn this on if you are comfortable sending them to your **local** Ollama server. Nothing is sent to a hosted AI service. Names stay in memory, not in `shell.json`; turning the switch off restores the Chinese numerals. This uses window metadata, not a screenshot: if the title is just “YouTube,” the widget cannot tell which video is playing.
 
-For terminal windows, Spaces also checks local child processes. An OMP terminal contributes its task title and project directory; a local Herdr terminal contributes the matching Herdr workspace, agent task title, and project directory from `herdr api snapshot`. This is polled every 12 seconds while contextual names are on. It does **not** read terminal screen contents, OMP conversation files, or Herdr pane buffers. Remote Herdr sessions and terminals without matching metadata keep their regular window titles. This additional task and project metadata is included in requests to local Ollama.
+For terminal windows, Spaces checks local child processes. OMP provides its task title; local Herdr provides the matching agent task from `herdr api snapshot`. The project directory is used **only if no task is available**. This is polled every 12 seconds while contextual names are on. It does **not** read terminal screen contents, OMP conversation files, or Herdr pane buffers. Remote Herdr sessions and terminals without matching metadata keep their regular window titles. Task or fallback project metadata is included only in requests to local Ollama.
 
 To open settings with a key, add this to `~/.config/hypr/bindings.lua`:
 

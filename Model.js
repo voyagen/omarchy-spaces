@@ -162,16 +162,56 @@ function workspaceApps(windows) {
   return apps.sort()
 }
 
-// Animated terminal spinners should not trigger another model request.
-function workspaceTitle(title) {
-  return String(title || "").replace(/[\u2800-\u28ff]/g, "").trim().slice(0, 120)
+// Keep activity identity stable across title counters, animated spinners, and
+// music-track changes. Video and document titles remain meaningful inputs.
+function workspaceTitle(title, appId) {
+  if (/spotify|cliamp/i.test(String(appId || ""))) return ""
+  return String(title || "").replace(/[\u2800-\u28ff]/g, "")
+    .replace(/^\(\d+\)\s*/, "").replace(/\s*\(\d+\)$/, "").trim().slice(0, 120)
+}
+
+function workspaceActivities(windows, terminalContexts) {
+  var activities = [], seen = {}
+  for (var i = 0; i < windows.length; i++) {
+    var w = windows[i], terminal = terminalContexts && terminalContexts[w.pid]
+    var task = terminal ? workspaceTitle(terminal.task).replace(/^π\s*(?:[>›→-]\s*)?/, "").trim() : ""
+    var activity = {
+      appId: String(w.appId || ""),
+      title: terminal ? "" : workspaceTitle(w.title, w.appId),
+      task: task,
+      project: terminal && !task ? String(terminal.project || terminal.space || "") : ""
+    }
+    var key = JSON.stringify(activity)
+    if (seen[key]) continue
+    seen[key] = true
+    activities.push(activity)
+  }
+  return activities
 }
 
 function workspaceSignature(windows, terminalContexts) {
-  return windows.map(function(w) {
-    var context = terminalContexts && terminalContexts[w.pid]
-    return [w.appId || "", workspaceTitle(w.title), context ? JSON.stringify(context) : ""].join(":")
+  return workspaceActivities(windows, terminalContexts).map(function(a) {
+    return JSON.stringify(a)
   }).sort().join("\n")
+}
+
+function composeActivityLabel(topics) {
+  var unique = [], seen = {}
+  for (var i = 0; i < topics.length; i++) {
+    var topic = String(topics[i] || "").trim().slice(0, 24)
+    if (!topic || seen[topic.toLowerCase()]) continue
+    seen[topic.toLowerCase()] = true
+    unique.push(topic)
+  }
+  if (!unique.length) return ""
+  var parts = unique.slice(0, 2), overflow = unique.length > 2 ? " +" + (unique.length - 2) : ""
+  while (parts.join(" + ").length + overflow.length > 36) {
+    var n = parts.length === 2 && parts[1].length > parts[0].length ? 1 : 0
+    var lastSpace = parts[n].lastIndexOf(" ")
+    if (lastSpace > 0) parts[n] = parts[n].slice(0, lastSpace)
+    else parts[n] = parts[n].slice(0, -1)
+  }
+  return parts.join(" + ") + overflow
 }
 
 // Installed-app categories provide a label before or without Ollama;
@@ -224,32 +264,8 @@ function parseWorkspaceName(text) {
   }
 }
 
-function parseMixedWorkspaceName(text) {
-  try {
-    var topics = JSON.parse(text)
-    function shortTopic(value) {
-      if (typeof value !== "string") return ""
-      var topic = value.replace(/[\r\n]+/g, " ").replace(/^[\s"'`]+|[\s"'`.!]+$/g, "")
-        .split(/\s+/).slice(0, 4).join(" ").slice(0, 24).trim()
-      return /^(browser|terminal|workspace|x11|omp|herdr|youtube)$/i.test(topic) ? "" : topic
-    }
-    var browser = shortTopic(topics.browserTopic)
-    var terminal = shortTopic(topics.terminalTopic)
-    if (!browser || !terminal) return ""
-    if (browser.toLowerCase() === terminal.toLowerCase()) return browser
-    while (browser.length + terminal.length + 3 > 36) {
-      if (terminal.includes(" ")) terminal = terminal.slice(0, terminal.lastIndexOf(" "))
-      else if (browser.includes(" ")) browser = browser.slice(0, browser.lastIndexOf(" "))
-      else return ""
-    }
-    return browser + " + " + terminal
-  } catch (error) {
-    return ""
-  }
-}
-
 function contextName(fallback, proposed) {
-  if (!proposed || /^(browser|terminal|workspace|x11)$/i.test(proposed))
+  if (!proposed || /^(browser|terminal|workspace|x11|youtube)$/i.test(proposed))
     return fallback || (/^(browser|terminal)$/i.test(proposed) ? proposed : "")
   return proposed
 }
@@ -500,9 +516,9 @@ if (typeof module !== "undefined") {
     agentStates: agentStates, parsePids: parsePids,
     previewWidth: previewWidth, monitorArea: monitorArea, previewLayout: previewLayout, durationFor: durationFor,
     workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceApps: workspaceApps,
-    workspaceTitle: workspaceTitle, workspaceSignature: workspaceSignature,
+    workspaceTitle: workspaceTitle, workspaceActivities: workspaceActivities,
+    workspaceSignature: workspaceSignature, composeActivityLabel: composeActivityLabel,
     categoryForApps: categoryForApps, parseWorkspaceName: parseWorkspaceName,
-    parseMixedWorkspaceName: parseMixedWorkspaceName,
     contextName: contextName,
     appKey: appKey,
     sortWindows: sortWindows, iconItems: iconItems, truncate: truncate,

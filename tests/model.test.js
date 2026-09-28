@@ -58,6 +58,52 @@ test("terminal task changes trigger renaming without a terminal title change", (
   assert.strictEqual(first, M.workspaceSignature(windows, { 42: { app: "Herdr", task: "Design bar", project: "topbar" } }))
 })
 
+test("unread counters, terminal animation, and music tracks do not rename a workspace", () => {
+  const windows = [
+    { appId: "google-chrome", title: "(6) AI News - YouTube" },
+    { appId: "Alacritty", title: "π ⠋ Fix the bar", pid: 42 },
+    { appId: "Spotify", title: "Artist - First Track" }
+  ]
+  const before = M.workspaceSignature(windows, { 42: { app: "OMP", task: "π ⠋ Fix the bar" } })
+  const after = M.workspaceSignature([
+    { ...windows[0], title: "(7) AI News - YouTube" },
+    { ...windows[1], title: "π ⠙ Fix the bar" },
+    { ...windows[2], title: "Artist - Next Track" }
+  ], { 42: { app: "OMP", task: "π ⠙ Fix the bar" } })
+  assert.strictEqual(after, before)
+  assert.notStrictEqual(M.workspaceSignature([{ ...windows[0], title: "(7) Science News - YouTube" }, windows[1], windows[2]],
+    { 42: { app: "OMP", task: "π ⠙ Fix the bar" } }), before)
+})
+
+test("each distinct activity survives topic selection, with a bounded overflow count", () => {
+  const windows = [
+    { appId: "google-chrome", title: "(4) AI News - YouTube" },
+    { appId: "Alacritty", title: "π ⠋ Fix the bar", pid: 42 },
+    { appId: "Spotify", title: "Artist - First Track" },
+    { appId: "google-chrome", title: "(5) AI News - YouTube" }
+  ]
+  const activities = M.workspaceActivities(windows, { 42: { app: "OMP", task: "π ⠙ Fix the bar", project: "my-project" } })
+  assert.strictEqual(activities.length, 3)
+  assert.strictEqual(activities[1].task, "Fix the bar")
+  assert.strictEqual(activities[1].project, "")
+  assert.deepStrictEqual(activities.map(a => a.title), ["AI News - YouTube", "", ""])
+  assert.strictEqual(M.composeActivityLabel(["AI News", "Bar Fix", "Music", "Bar Fix"]), "AI News + Bar Fix +1")
+  assert.ok(M.composeActivityLabel(["Long Development Topic", "Screen Context Changes", "Music"]).length <= 36)
+  const many = Array.from({ length: 10 }, (_, i) => ({ appId: "google-chrome", title: "Article " + i }))
+  assert.strictEqual(M.workspaceActivities(many).length, 10)
+  assert.strictEqual(M.composeActivityLabel(many.map(w => w.title)), "Article 0 + Article 1 +8")
+})
+
+test("Herdr task takes precedence over project, with project fallback", () => {
+  const window = [{ appId: "Alacritty", title: "omarchy: smartspaces", pid: 55 }]
+  const working = M.workspaceActivities(window, { 55: { app: "Herdr", task: "π > Troubleshoot Widget", project: "oma-smartspaces" } })
+  assert.strictEqual(working[0].task, "Troubleshoot Widget")
+  assert.strictEqual(working[0].project, "")
+  const idle = M.workspaceActivities(window, { 55: { app: "Herdr", task: "", project: "oma-smartspaces" } })
+  assert.strictEqual(idle[0].task, "")
+  assert.strictEqual(idle[0].project, "oma-smartspaces")
+})
+
 test("known application combinations prefer specific broad categories", () => {
   assert.strictEqual(M.categoryForApps(["Alacritty", "Google Chrome"]), "Browser")
   assert.strictEqual(M.categoryForApps(["Visual Studio Code", "Alacritty"]), "Development")
@@ -80,22 +126,11 @@ test("contextual names keep topic detail but reject invalid or overlong response
   assert.strictEqual(M.parseWorkspaceName('nonsense'), "")
 })
 
-test("mixed browser and agent topics both survive a short bar label", () => {
-  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"AI News","terminalTopic":"Screen Context"}'),
-    "AI News + Screen Context")
-  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"AI News","terminalTopic":"Add Screen Context"}'),
-    "AI News + Add Screen Context")
-  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"AI News","terminalTopic":"AI News"}'), "AI News")
-  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"Browser","terminalTopic":"Screen Context"}'), "")
-  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"YouTube","terminalTopic":"Screen Context"}'), "")
-  assert.strictEqual(M.parseMixedWorkspaceName('{"browserTopic":"AI News","terminalTopic":42}'), "")
-  assert.strictEqual(M.parseMixedWorkspaceName('invalid'), "")
-})
-
 test("generic model names fall back to the known app category", () => {
   assert.strictEqual(M.contextName("Browser", "Game Development"), "Game Development")
   assert.strictEqual(M.contextName("Browser", "Terminal"), "Browser")
   assert.strictEqual(M.contextName("Chat", "workspace"), "Chat")
+  assert.strictEqual(M.contextName("Browser", "YouTube"), "Browser")
   assert.strictEqual(M.contextName("Browser", ""), "Browser")
   assert.strictEqual(M.contextName("", "Music Editing"), "Music Editing")
 })
