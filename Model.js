@@ -18,6 +18,7 @@ var DEFAULTS = {
   titleLength: 24,
   activeStyle: "subtle",      // "subtle" | "solid" | "accent"
   labelStyle: "number",       // "number" (Chinese numerals) | "glyph" | "none"
+  aiNames: false,             // label occupied workspaces with local Ollama names
   animations: true,
   animationSpeed: "normal",   // "slow" | "normal" | "fast"
   scrollSwitch: true,
@@ -76,6 +77,7 @@ function resolveSettings(raw) {
     titleLength: clampInt(s.titleLength, 8, 60, d.titleLength),
     activeStyle: oneOf(s.activeStyle, ACTIVE_STYLES, d.activeStyle),
     labelStyle: oneOf(s.labelStyle, LABEL_STYLES, d.labelStyle),
+    aiNames: bool(s.aiNames, d.aiNames),
     animations: bool(s.animations, d.animations),
     animationSpeed: oneOf(s.animationSpeed, SPEEDS, d.animationSpeed),
     scrollSwitch: bool(s.scrollSwitch, d.scrollSwitch),
@@ -148,6 +150,19 @@ function workspaceLabel(id, focused, style) {
   if (style === "none") return ""
   if (style === "glyph" && focused) return "󱓻"
   return WORKSPACE_NUMERALS[id - 1] || String(id)
+}
+
+// Ignore focus and window ordering: neither changes what a workspace contains.
+function workspaceSignature(windows) {
+  return windows.map(function(w) {
+    return [w.appId || "", String(w.title || "").slice(0, 120)].join(":")
+  }).sort().join("\n")
+}
+
+function namedWorkspaceLabel(id, focused, style, aiNames, name) {
+  var base = workspaceLabel(id, focused, style)
+  if (!aiNames || !name || style === "none") return base
+  return base + " · " + name
 }
 
 // Stable key identifying "the same app" across windows.
@@ -395,7 +410,8 @@ if (typeof module !== "undefined") {
     densityMetrics: densityMetrics, normalizeAddress: normalizeAddress,
     agentStates: agentStates, parsePids: parsePids,
     previewWidth: previewWidth, monitorArea: monitorArea, previewLayout: previewLayout, durationFor: durationFor,
-    workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, appKey: appKey,
+    workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceSignature: workspaceSignature,
+    namedWorkspaceLabel: namedWorkspaceLabel, appKey: appKey,
     sortWindows: sortWindows, iconItems: iconItems, truncate: truncate,
     focusedLabel: focusedLabel, webAppHost: webAppHost, appIdCandidates: appIdCandidates, iconPathScore: iconPathScore,
     iconNameFromPath: iconNameFromPath, stepWorkspace: stepWorkspace, mergedEntry: mergedEntry

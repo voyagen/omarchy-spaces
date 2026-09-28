@@ -87,6 +87,12 @@ Choose when icons show (always, active, on hover, or never), icon style and size
 
 Workspace numbers 1–10 display as 一 二 三 四 五 六 七 八 九 十. The “Glyph” setting replaces the active workspace's numeral with a glyph.
 
+### Optional AI names
+
+Install Ollama and download `qwen3:1.7b` once with `ollama pull qwen3:1.7b`. In Spaces settings, turn on **AI workspace names** (off by default). Occupied workspaces then show their Chinese numeral and a short generated name, such as `一 · Research`. Empty workspaces keep their numerals. If Ollama is stopped or the model is unavailable, the numeral remains.
+
+The widget sends app IDs and up to eight window titles per workspace to Ollama at `127.0.0.1:11434`. It waits for window changes to settle and does not block workspace switching while generating names. Names stay in memory, not in `shell.json`; turning the switch off stops new requests and restores the original labels. Window titles may contain private data; nothing is sent to a hosted AI service.
+
 To open settings with a key, add this to `~/.config/hypr/bindings.lua`:
 
 ```lua

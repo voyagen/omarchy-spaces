@@ -70,6 +70,12 @@
         "default": "number"
       },
       {
+        "key": "aiNames",
+        "type": "bool",
+        "label": "AI workspace names (local Ollama)",
+        "default": false
+      },
+      {
         "key": "iconSize",
         "type": "int",
         "label": "Icon size",

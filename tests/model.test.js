@@ -37,6 +37,25 @@ test("workspace labels use Chinese numerals without changing glyph and none mode
   assert.strictEqual(M.workspaceLabel(3, false, "glyph"), "三")
 })
 
+test("AI labels preserve workspace identifiers and honor the switch", () => {
+  assert.strictEqual(M.namedWorkspaceLabel(2, false, "number", true, "Research"), "二 · Research")
+  assert.strictEqual(M.namedWorkspaceLabel(2, false, "number", false, "Research"), "二")
+  assert.strictEqual(M.namedWorkspaceLabel(2, false, "number", true, ""), "二")
+  assert.strictEqual(M.namedWorkspaceLabel(2, true, "glyph", true, "Research"), "󱓻 · Research")
+  assert.strictEqual(M.namedWorkspaceLabel(2, false, "none", true, "Research"), "")
+  assert.strictEqual(M.resolveSettings({ aiNames: true }).aiNames, true)
+  assert.strictEqual(M.resolveSettings({ aiNames: "true" }).aiNames, false)
+})
+
+test("workspace signature changes with content, not focus or window order", () => {
+  const windows = [{ appId: "firefox", title: "Research", focused: true },
+                   { appId: "foot", title: "notes", focused: false }]
+  const signature = M.workspaceSignature(windows)
+  assert.strictEqual(M.workspaceSignature(windows.slice().reverse().map(w => ({ ...w, focused: !w.focused }))), signature)
+  assert.notStrictEqual(M.workspaceSignature([{ appId: "firefox", title: "Inbox" }, windows[1]]), signature)
+  assert.notStrictEqual(M.workspaceSignature([windows[0]]), signature)
+})
+
 test("sortWindows orders by x then y, unknown last", () => {
   const w = [{ id: "a", at: [500, 0] }, { id: "b" }, { id: "c", at: [10, 300] }, { id: "d", at: [10, 5] }]
   assert.deepStrictEqual(M.sortWindows(w).map(x => x.id), ["d", "c", "a", "b"])
