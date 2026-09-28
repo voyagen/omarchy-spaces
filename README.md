@@ -87,13 +87,13 @@ Choose when icons show (always, active, on hover, or never), icon style and size
 
 Workspace numbers 1–10 display as 一 二 三 四 五 六 七 八 九 十. The “Glyph” setting replaces the active workspace's numeral with a glyph.
 
-### Optional automatic categories
+### Optional contextual names
 
-Install Ollama and download `qwen3:1.7b` once with `ollama pull qwen3:1.7b`. In Spaces settings, turn on **Automatic workspace categories** (off by default). Occupied workspaces show **Chinese numeral → app icons → category title**, such as `一 [icons] Development`. Empty workspaces keep their numerals.
+Install Ollama and download `qwen3:1.7b` once with `ollama pull qwen3:1.7b`. In Spaces settings, turn on **Contextual workspace names** (off by default). Occupied workspaces show **Chinese numeral → app icons → name**, such as `一 [icons] Game Development`. Empty workspaces keep their numerals.
 
-Known applications get an immediate category; local Ollama can refine Browser and Terminal using window titles, while dedicated-app categories such as Music or Chat stay stable. It chooses from Development, Browser, Movie, Audio, Music, Chat, Gaming, Design, Writing, Office, Photos, Files, System, and Terminal. If the model is unavailable or returns an invalid category, the known-app category remains; otherwise the workspace keeps its numeral.
+The widget first shows a broad category inferred from installed app names. Local Ollama then uses window titles to replace it with a more specific 2–5-word activity or topic when the titles contain useful context. If Ollama is unavailable or returns an invalid name, the broad category remains; otherwise only the numeral is shown.
 
-| Applications (without a more specific title) | Initial category |
+| Applications (when titles are vague) | Fallback name |
 | --- | --- |
 | VS Code or Neovim + Alacritty/Foot | Development |
 | Chrome or Chromium + terminal | Browser |
@@ -104,7 +104,9 @@ Known applications get an immediate category; local Ollama can refine Browser an
 | ComfyUI or Pinta | Design |
 | Obsidian or LibreOffice Writer | Writing |
 
-The widget sends the application names and titles of up to eight windows per workspace to Ollama at `127.0.0.1:11434`. Meaningful title changes may update the category; animated terminal-title spinners are ignored. Titles can contain private document names or messages, so only turn this on if you are comfortable sending them to your **local** Ollama server. Nothing is sent to a hosted AI service. Categories stay in memory, not in `shell.json`; turning the switch off restores the Chinese numerals. Without a separate YouTube app, a browser showing a film can be classified as Movie only when its title provides that context.
+The widget sends the application names and titles of up to eight windows per workspace to Ollama at `127.0.0.1:11434`. Meaningful title changes may update the name; animated terminal-title spinners are ignored. Titles can contain private document names or messages, so only turn this on if you are comfortable sending them to your **local** Ollama server. Nothing is sent to a hosted AI service. Names stay in memory, not in `shell.json`; turning the switch off restores the Chinese numerals. This uses window metadata, not a screenshot: if the title is just “YouTube,” the widget cannot tell which video is playing.
+
+For terminal windows, Spaces also checks local child processes. An OMP terminal contributes its task title and project directory; a local Herdr terminal contributes the matching Herdr workspace, agent task title, and project directory from `herdr api snapshot`. This is polled every 12 seconds while contextual names are on. It does **not** read terminal screen contents, OMP conversation files, or Herdr pane buffers. Remote Herdr sessions and terminals without matching metadata keep their regular window titles. This additional task and project metadata is included in requests to local Ollama.
 
 To open settings with a key, add this to `~/.config/hypr/bindings.lua`:
 

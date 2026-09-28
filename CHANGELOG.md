@@ -6,8 +6,8 @@
 - Updated widget IPC, agent hook, and installation instructions to use the new ID.
 - Workspace labels 1–10 now use Chinese numerals instead of Western digits.
 - Added opt-in local Ollama naming for occupied workspaces, with numeral fallback.
-- Automatic workspace categories use installed-app combinations and window titles with local Ollama; the output is restricted to broad category names.
-- Categorizes known installed apps and constrains Ollama to broad categories; generic browsers and terminals no longer produce arbitrary project names.
+- Contextual workspace names now use titles to describe the topic beyond broad app categories, with short model output and an app-based fallback.
+- Enriches local Ollama context with running OMP/Herdr task and project metadata from terminals.
 
 ## 1.0.0
 

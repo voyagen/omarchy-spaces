@@ -167,18 +167,15 @@ function workspaceTitle(title) {
   return String(title || "").replace(/[\u2800-\u28ff]/g, "").trim().slice(0, 120)
 }
 
-function workspaceSignature(windows) {
+function workspaceSignature(windows, terminalContexts) {
   return windows.map(function(w) {
-    return [w.appId || "", workspaceTitle(w.title)].join(":")
+    var context = terminalContexts && terminalContexts[w.pid]
+    return [w.appId || "", workspaceTitle(w.title), context ? JSON.stringify(context) : ""].join(":")
   }).sort().join("\n")
 }
 
-var AI_CATEGORIES = ["Development", "Browser", "Movie", "Audio", "Music", "Chat",
-                     "Gaming", "Design", "Writing", "Office", "Photos", "Files",
-                     "System", "Terminal", "Other"]
-
-// Recognizable installed apps are more reliable than a small model guessing
-// from names such as "mpv" or "Alacritty". Unlisted apps go to Ollama.
+// Installed-app categories provide a label before or without Ollama;
+// its contextual name can replace them when titles have more detail.
 var APP_CATEGORIES = {
   "visual studio code": "Development", "neovim": "Development", "docker": "Development",
   "google chrome": "Browser", "chromium": "Browser",
@@ -216,22 +213,20 @@ function categoryForApps(apps) {
   return specific || (!unknown ? generic : "")
 }
 
-function parseAiCategory(text) {
+function parseWorkspaceName(text) {
   try {
-    var category = JSON.parse(text).category
-    return category !== "Other" && AI_CATEGORIES.indexOf(category) !== -1 ? category : ""
+    var name = JSON.parse(text).name
+    if (typeof name !== "string") return ""
+    return name.replace(/[\r\n]+/g, " ").replace(/^[\s"'`]+|[\s"'`.!]+$/g, "")
+      .split(/\s+/).slice(0, 5).join(" ").slice(0, 36)
   } catch (error) {
     return ""
   }
 }
 
-// A tiny model can mistake a browser+terminal workspace for "Terminal".
-// Keep the app-based category unless titles justify a more specific one.
-function refineCategory(fallback, proposed) {
-  if (!proposed) return fallback
-  if (fallback && fallback !== "Browser" && fallback !== "Terminal") return fallback
-  if (fallback === "Browser" && proposed === "Terminal") return fallback
-  if (fallback === "Terminal" && proposed === "Browser") return fallback
+function contextName(fallback, proposed) {
+  if (!proposed || /^(browser|terminal|workspace|x11)$/i.test(proposed))
+    return fallback || (/^(browser|terminal)$/i.test(proposed) ? proposed : "")
   return proposed
 }
 
@@ -482,8 +477,8 @@ if (typeof module !== "undefined") {
     previewWidth: previewWidth, monitorArea: monitorArea, previewLayout: previewLayout, durationFor: durationFor,
     workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceApps: workspaceApps,
     workspaceTitle: workspaceTitle, workspaceSignature: workspaceSignature,
-    AI_CATEGORIES: AI_CATEGORIES, categoryForApps: categoryForApps, parseAiCategory: parseAiCategory,
-    refineCategory: refineCategory,
+    categoryForApps: categoryForApps, parseWorkspaceName: parseWorkspaceName,
+    contextName: contextName,
     appKey: appKey,
     sortWindows: sortWindows, iconItems: iconItems, truncate: truncate,
     focusedLabel: focusedLabel, webAppHost: webAppHost, appIdCandidates: appIdCandidates, iconPathScore: iconPathScore,

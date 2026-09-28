@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Return lightweight context for terminals hosting OMP or a local Herdr client.
+# Input: JSON [{pid, title}]. Output: JSON object keyed by terminal PID.
+set -uo pipefail
+
+has_child() {
+  local pid=$1 wanted=$2 child found
+  [[ -r /proc/$pid/task/$pid/children ]] || return 1
+  for child in $(</proc/$pid/task/$pid/children); do
+    [[ -r /proc/$child/comm ]] || continue
+    IFS= read -r found < "/proc/$child/comm" || continue
+    if [[ $found == "$wanted" ]]; then printf '%s' "$child"; return 0; fi
+    has_child "$child" "$wanted" && return 0
+  done
+  return 1
+}
+
+snapshot=''
+records=()
+while IFS= read -r entry; do
+  pid=$(jq -r '.pid' <<< "$entry")
+  [[ $pid =~ ^[0-9]+$ && $pid -gt 1 ]] || continue
+  title=$(jq -r '.title // ""' <<< "$entry")
+
+  # Herdr clients expose their current space via the terminal title. Match
+  # that label to the server snapshot rather than guessing a different pane.
+  if [[ $title == omarchy:* ]] && has_child "$pid" herdr >/dev/null; then
+    if [[ -z $snapshot ]]; then snapshot=$(herdr api snapshot 2>/dev/null) || snapshot='{}'; fi
+    label=${title#omarchy:}
+    label=${label# }
+    ws=$(jq -r --arg label "$label" '.result.snapshot.workspaces[]? | select(.label == $label) | .workspace_id' <<< "$snapshot" | tr -d '\n')
+    if [[ -n $ws ]]; then
+      agent=$(jq -c --arg ws "$ws" '[.result.snapshot.agents[]? | select(.workspace_id == $ws)] | (map(select(.focused == true)) + .)[0] // {}' <<< "$snapshot")
+      task=$(jq -r '.terminal_title_stripped // ""' <<< "$agent")
+      cwd=$(jq -r '.foreground_cwd // .cwd // ""' <<< "$agent")
+      project=${cwd##*/}
+      records+=("$(jq -nc --arg pid "$pid" --arg space "$label" --arg task "$task" --arg project "$project" '{key:$pid,value:{app:"Herdr",space:$space,task:$task,project:$project}}')")
+      continue
+    fi
+  fi
+
+  if omp_pid=$(has_child "$pid" omp); then
+    cwd=$(readlink -f "/proc/$omp_pid/cwd" 2>/dev/null) || cwd=''
+    project=${cwd##*/}
+    [[ $cwd == "$HOME" || $cwd == "$HOME/Projects" ]] && project=''
+    records+=("$(jq -nc --arg pid "$pid" --arg task "$title" --arg project "$project" '{key:$pid,value:{app:"OMP",task:$task,project:$project}}')")
+  fi
+done < <(jq -c '.[]' <<< "${1:-[]}")
+
+printf '%s\n' "${records[@]}" | jq -sc 'map(select(type == "object")) | from_entries'

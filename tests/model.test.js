@@ -50,6 +50,14 @@ test("AI context changes for meaningful titles, not focus or animated spinners",
   assert.notStrictEqual(M.workspaceSignature([windows[0]]), signature)
 })
 
+test("terminal task changes trigger renaming without a terminal title change", () => {
+  const windows = [{ appId: "Alacritty", title: "omarchy: gradient", pid: 42 }]
+  const first = M.workspaceSignature(windows, { 42: { app: "Herdr", task: "Design bar", project: "topbar" } })
+  const second = M.workspaceSignature(windows, { 42: { app: "Herdr", task: "Fix preview", project: "topbar" } })
+  assert.notStrictEqual(first, second)
+  assert.strictEqual(first, M.workspaceSignature(windows, { 42: { app: "Herdr", task: "Design bar", project: "topbar" } }))
+})
+
 test("known application combinations prefer specific broad categories", () => {
   assert.strictEqual(M.categoryForApps(["Alacritty", "Google Chrome"]), "Browser")
   assert.strictEqual(M.categoryForApps(["Visual Studio Code", "Alacritty"]), "Development")
@@ -65,21 +73,19 @@ test("known application combinations prefer specific broad categories", () => {
   assert.strictEqual(M.categoryForApps(["Unlisted App"]), "")
 })
 
-test("AI category accepts only named broad categories", () => {
-  assert.strictEqual(M.parseAiCategory(' { \"category\": \"Movie\" } '), "Movie")
-  assert.strictEqual(M.parseAiCategory('{"category":"Other"}'), "")
-  assert.strictEqual(M.parseAiCategory('{\"category\":\"X11\"}'), "")
-  assert.strictEqual(M.parseAiCategory('Research'), "")
+test("contextual names keep topic detail but reject invalid or overlong responses", () => {
+  assert.strictEqual(M.parseWorkspaceName('{"name":"Game Development"}'), "Game Development")
+  assert.strictEqual(M.parseWorkspaceName('{"name":"Building a Steam Game Tutorial Today"}'), "Building a Steam Game Tutorial")
+  assert.strictEqual(M.parseWorkspaceName('{"name":42}'), "")
+  assert.strictEqual(M.parseWorkspaceName('nonsense'), "")
 })
 
-test("category refinement does not let a generic model answer override a stronger app", () => {
-  assert.strictEqual(M.refineCategory("Browser", "Terminal"), "Browser")
-  assert.strictEqual(M.refineCategory("Terminal", "Browser"), "Terminal")
-  assert.strictEqual(M.refineCategory("Chat", "Terminal"), "Chat")
-  assert.strictEqual(M.refineCategory("Browser", "Movie"), "Movie")
-  assert.strictEqual(M.refineCategory("Terminal", "Development"), "Development")
-  assert.strictEqual(M.refineCategory("Browser", ""), "Browser")
-  assert.strictEqual(M.refineCategory("", "Music"), "Music")
+test("generic model names fall back to the known app category", () => {
+  assert.strictEqual(M.contextName("Browser", "Game Development"), "Game Development")
+  assert.strictEqual(M.contextName("Browser", "Terminal"), "Browser")
+  assert.strictEqual(M.contextName("Chat", "workspace"), "Chat")
+  assert.strictEqual(M.contextName("Browser", ""), "Browser")
+  assert.strictEqual(M.contextName("", "Music Editing"), "Music Editing")
 })
 
 test("sortWindows orders by x then y, unknown last", () => {
