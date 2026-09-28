@@ -152,8 +152,7 @@ function workspaceLabel(id, focused, style) {
   return WORKSPACE_NUMERALS[id - 1] || String(id)
 }
 
-// The app set is stable across title changes, focus changes, and extra windows
-// of the same app; no window titles enter the AI naming path.
+// App IDs are stable across window ordering and focus changes.
 function workspaceApps(windows) {
   var apps = []
   for (var i = 0; i < windows.length; i++) {
@@ -163,14 +162,67 @@ function workspaceApps(windows) {
   return apps.sort()
 }
 
-function workspaceSignature(windows) {
-  return workspaceApps(windows).join("\n")
+// Animated terminal spinners should not trigger another model request.
+function workspaceTitle(title) {
+  return String(title || "").replace(/[\u2800-\u28ff]/g, "").trim().slice(0, 120)
 }
 
-function namedWorkspaceLabel(id, focused, style, aiNames, name) {
-  var base = workspaceLabel(id, focused, style)
-  if (!aiNames || !name || style === "none") return base
-  return base + " · " + name
+function workspaceSignature(windows) {
+  return windows.map(function(w) {
+    return [w.appId || "", workspaceTitle(w.title)].join(":")
+  }).sort().join("\n")
+}
+
+var AI_CATEGORIES = ["Development", "Browser", "Movie", "Audio", "Music", "Chat",
+                     "Gaming", "Design", "Writing", "Office", "Photos", "Files",
+                     "System", "Terminal", "Other"]
+
+// Recognizable installed apps are more reliable than a small model guessing
+// from names such as "mpv" or "Alacritty". Unlisted apps go to Ollama.
+var APP_CATEGORIES = {
+  "visual studio code": "Development", "neovim": "Development", "docker": "Development",
+  "google chrome": "Browser", "chromium": "Browser",
+  "alacritty": "Terminal", "foot": "Terminal", "foot client": "Terminal", "foot server": "Terminal",
+  "spotify": "Music", "cliamp": "Music",
+  "media player": "Movie", "mpv media player": "Movie", "iptvnator": "Movie",
+  "youtube": "Movie", "kdenlive": "Movie", "omacut": "Movie",
+  "discord": "Chat", "whatsapp": "Chat", "zoom": "Chat", "google messages": "Chat", "hey": "Chat",
+  "counter-strike 2": "Gaming", "steam": "Gaming", "moonlight": "Gaming",
+  "comfyui": "Design", "pinta": "Design", "xournal++": "Design",
+  "obsidian": "Writing", "omawrite": "Writing", "libreoffice writer": "Writing",
+  "libreoffice": "Office", "libreoffice calc": "Office", "libreoffice impress": "Office",
+  "google photos": "Photos", "image viewer": "Photos",
+  "files": "Files", "localsend": "Files",
+  "aether": "System", "disk usage": "System", "disks": "System", "btop++": "System",
+  "tailscale": "System"
+}
+
+function categoryForApps(apps) {
+  var specific = ""
+  var generic = ""
+  var unknown = false
+  for (var i = 0; i < apps.length; i++) {
+    var category = APP_CATEGORIES[String(apps[i]).toLowerCase()]
+    if (typeof category !== "string") { unknown = true; continue }
+    if (category === "Browser" || category === "Terminal") {
+      if (category === "Browser") generic = "Browser"
+      else if (!generic) generic = "Terminal"
+    } else if (specific && specific !== category) {
+      return ""
+    } else {
+      specific = category
+    }
+  }
+  return specific || (!unknown ? generic : "")
+}
+
+function parseAiCategory(text) {
+  try {
+    var category = JSON.parse(text).category
+    return category !== "Other" && AI_CATEGORIES.indexOf(category) !== -1 ? category : ""
+  } catch (error) {
+    return ""
+  }
 }
 
 // Stable key identifying "the same app" across windows.
@@ -419,8 +471,9 @@ if (typeof module !== "undefined") {
     agentStates: agentStates, parsePids: parsePids,
     previewWidth: previewWidth, monitorArea: monitorArea, previewLayout: previewLayout, durationFor: durationFor,
     workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceApps: workspaceApps,
-    workspaceSignature: workspaceSignature,
-    namedWorkspaceLabel: namedWorkspaceLabel, appKey: appKey,
+    workspaceTitle: workspaceTitle, workspaceSignature: workspaceSignature,
+    AI_CATEGORIES: AI_CATEGORIES, categoryForApps: categoryForApps, parseAiCategory: parseAiCategory,
+    appKey: appKey,
     sortWindows: sortWindows, iconItems: iconItems, truncate: truncate,
     focusedLabel: focusedLabel, webAppHost: webAppHost, appIdCandidates: appIdCandidates, iconPathScore: iconPathScore,
     iconNameFromPath: iconNameFromPath, stepWorkspace: stepWorkspace, mergedEntry: mergedEntry

@@ -87,11 +87,24 @@ Choose when icons show (always, active, on hover, or never), icon style and size
 
 Workspace numbers 1–10 display as 一 二 三 四 五 六 七 八 九 十. The “Glyph” setting replaces the active workspace's numeral with a glyph.
 
-### Optional AI names
+### Optional automatic categories
 
-Install Ollama and download `qwen3:1.7b` once with `ollama pull qwen3:1.7b`. In Spaces settings, turn on **AI workspace names** (off by default). Occupied workspaces then show their Chinese numeral and a short generated name, such as `一 · Research`. Empty workspaces keep their numerals. If Ollama is stopped or the model is unavailable, the numeral remains.
+Install Ollama and download `qwen3:1.7b` once with `ollama pull qwen3:1.7b`. In Spaces settings, turn on **Automatic workspace categories** (off by default). Occupied workspaces show **Chinese numeral → app icons → category title**, such as `一 [icons] Development`. Empty workspaces keep their numerals.
 
-The widget sends the names of up to eight distinct applications per workspace to Ollama at `127.0.0.1:11434`. It does not send window titles; opening another window of the same app does not trigger renaming. It waits for app changes to settle and does not block workspace switching while generating names. Names stay in memory, not in `shell.json`; turning the switch off stops new requests and restores the original labels. Nothing is sent to a hosted AI service. Because only app names are used, two browser-only workspaces may get the same broad label.
+Known applications get an immediate category; local Ollama can refine it using the window titles. It chooses from Development, Browser, Movie, Audio, Music, Chat, Gaming, Design, Writing, Office, Photos, Files, System, and Terminal. If the model is unavailable or returns an invalid category, the known-app category remains; otherwise the workspace keeps its numeral.
+
+| Applications (without a more specific title) | Initial category |
+| --- | --- |
+| VS Code or Neovim + Alacritty/Foot | Development |
+| Chrome or Chromium + terminal | Browser |
+| Spotify or cliamp + browser | Music |
+| mpv, IPTVnator, or YouTube + browser | Movie |
+| Discord, WhatsApp, or Zoom + browser | Chat |
+| Steam, Counter-Strike 2, or Moonlight | Gaming |
+| ComfyUI or Pinta | Design |
+| Obsidian or LibreOffice Writer | Writing |
+
+The widget sends the application names and titles of up to eight windows per workspace to Ollama at `127.0.0.1:11434`. Meaningful title changes may update the category; animated terminal-title spinners are ignored. Titles can contain private document names or messages, so only turn this on if you are comfortable sending them to your **local** Ollama server. Nothing is sent to a hosted AI service. Categories stay in memory, not in `shell.json`; turning the switch off restores the Chinese numerals. Without a separate YouTube app, a browser showing a film can be classified as Movie only when its title provides that context.
 
 To open settings with a key, add this to `~/.config/hypr/bindings.lua`:
 

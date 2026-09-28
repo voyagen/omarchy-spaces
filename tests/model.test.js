@@ -19,6 +19,8 @@ test("resolveSettings fills defaults and clamps", () => {
   assert.strictEqual(s.showApps, "hover")
   assert.strictEqual(s.persistentWorkspaces, 0)
   assert.strictEqual(s.groupApps, false)
+  assert.strictEqual(M.resolveSettings({ aiNames: true }).aiNames, true)
+  assert.strictEqual(M.resolveSettings({ aiNames: "true" }).aiNames, false)
 })
 
 test("workspaceIds keeps persistent, adds occupied and active, sorted", () => {
@@ -37,26 +39,37 @@ test("workspace labels use Chinese numerals without changing glyph and none mode
   assert.strictEqual(M.workspaceLabel(3, false, "glyph"), "三")
 })
 
-test("AI labels preserve workspace identifiers and honor the switch", () => {
-  assert.strictEqual(M.namedWorkspaceLabel(2, false, "number", true, "Research"), "二 · Research")
-  assert.strictEqual(M.namedWorkspaceLabel(2, false, "number", false, "Research"), "二")
-  assert.strictEqual(M.namedWorkspaceLabel(2, false, "number", true, ""), "二")
-  assert.strictEqual(M.namedWorkspaceLabel(2, true, "glyph", true, "Research"), "󱓻 · Research")
-  assert.strictEqual(M.namedWorkspaceLabel(2, false, "none", true, "Research"), "")
-  assert.strictEqual(M.resolveSettings({ aiNames: true }).aiNames, true)
-  assert.strictEqual(M.resolveSettings({ aiNames: "true" }).aiNames, false)
-})
-
-test("AI workspace context depends on apps, not window titles or focus", () => {
-  const windows = [{ appId: "firefox", title: "Research", focused: true },
-                   { appId: "foot", title: "notes", focused: false },
-                   { appId: "foot", title: "another document", focused: false }]
+test("AI context changes for meaningful titles, not focus or animated spinners", () => {
+  const windows = [{ appId: "firefox", title: "Movie trailer", focused: true },
+                   { appId: "foot", title: "⠋ notes", focused: false }]
   assert.deepStrictEqual(M.workspaceApps(windows), ["firefox", "foot"])
   const signature = M.workspaceSignature(windows)
-  assert.strictEqual(M.workspaceSignature(windows.slice().reverse().map(w => ({ ...w, title: "Private message", focused: !w.focused }))), signature)
-  assert.strictEqual(M.workspaceSignature(windows.concat({ appId: "foot", title: "More notes" })), signature)
+  assert.strictEqual(M.workspaceSignature(windows.slice().reverse().map(w => ({ ...w, focused: !w.focused, title: w.title.replace("⠋", "⠙") }))), signature)
+  assert.strictEqual(M.workspaceTitle("⠙ notes"), "notes")
+  assert.notStrictEqual(M.workspaceSignature([{ appId: "firefox", title: "Python documentation" }, windows[1]]), signature)
   assert.notStrictEqual(M.workspaceSignature([windows[0]]), signature)
-  assert.notStrictEqual(M.workspaceSignature([{ appId: "firefox" }, { appId: "music" }]), signature)
+})
+
+test("known application combinations prefer specific broad categories", () => {
+  assert.strictEqual(M.categoryForApps(["Alacritty", "Google Chrome"]), "Browser")
+  assert.strictEqual(M.categoryForApps(["Visual Studio Code", "Alacritty"]), "Development")
+  assert.strictEqual(M.categoryForApps(["Media Player", "Google Chrome"]), "Movie")
+  assert.strictEqual(M.categoryForApps(["YouTube", "Google Chrome"]), "Movie")
+  assert.strictEqual(M.categoryForApps(["Google Chrome"]), "Browser")
+  assert.strictEqual(M.categoryForApps(["Spotify", "Google Chrome"]), "Music")
+  assert.strictEqual(M.categoryForApps(["Discord", "Google Chrome"]), "Chat")
+  assert.strictEqual(M.categoryForApps(["Alacritty", "Foot"]), "Terminal")
+  assert.strictEqual(M.categoryForApps(["ComfyUI", "Pinta"]), "Design")
+  assert.strictEqual(M.categoryForApps(["Spotify", "Media Player"]), "")
+  assert.strictEqual(M.categoryForApps(["Visual Studio Code", "Spotify"]), "")
+  assert.strictEqual(M.categoryForApps(["Unlisted App"]), "")
+})
+
+test("AI category accepts only named broad categories", () => {
+  assert.strictEqual(M.parseAiCategory(' { \"category\": \"Movie\" } '), "Movie")
+  assert.strictEqual(M.parseAiCategory('{"category":"Other"}'), "")
+  assert.strictEqual(M.parseAiCategory('{\"category\":\"X11\"}'), "")
+  assert.strictEqual(M.parseAiCategory('Research'), "")
 })
 
 test("sortWindows orders by x then y, unknown last", () => {
