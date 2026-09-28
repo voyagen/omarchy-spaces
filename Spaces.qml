@@ -17,8 +17,8 @@ import "Model.js" as Model
 // settings. Settings persist inline on this widget's shell.json entry.
 Panel {
   id: root
-  moduleName: "tornikegomareli.spaces"
-  ipcTarget: "tornikegomareli.spaces"
+  moduleName: "voyagen.spaces"
+  ipcTarget: "voyagen.spaces"
   manageIpc: false
 
   // ------------------------------------------------------------ settings
@@ -531,7 +531,7 @@ Panel {
   // ------------------------------------------------------------ IPC
 
   IpcHandler {
-    target: "tornikegomareli.spaces"
+    target: "voyagen.spaces"
 
     function open(): void { root.open() }
     function close(): void { root.close() }
@@ -993,7 +993,7 @@ Panel {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: root.toggle()
-        onContainsMouseChanged: containsMouse ? root.showTip(gear, "Spaces settings") : root.hideTip(gear)
+        onContainsMouseChanged: containsMouse ? root.showTip(gear, "Voyagen Spaces settings") : root.hideTip(gear)
       }
     }
   }
@@ -1284,7 +1284,7 @@ Panel {
             width: parent.width
             spacing: Style.space(2)
             Text {
-              text: "Spaces"
+              text: "Voyagen Spaces"
               color: root.fg
               font.family: root.fontFamily
               font.pixelSize: Style.font.title

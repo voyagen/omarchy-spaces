@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "tornikegomareli.spaces",
-  "name": "Spaces",
+  "id": "voyagen.spaces",
+  "name": "Voyagen Spaces",
   "version": "1.0.0",
   "author": "Tornike Gomareli",
   "description": "Workspace switcher that shows the apps open on each workspace",
@@ -12,7 +12,7 @@
     "barWidget": "Spaces.qml"
   },
   "barWidget": {
-    "displayName": "Spaces",
+    "displayName": "Voyagen Spaces",
     "description": "Workspace switcher that shows the apps open on each workspace",
     "category": "Compositor",
     "allowMultiple": false,

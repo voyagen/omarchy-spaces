@@ -1,4 +1,4 @@
-<h1 align="center">Spaces</h1>
+<h1 align="center">Voyagen Spaces</h1>
 
 <h3 align="center">See what runs on every workspace.</h3>
 
@@ -6,7 +6,7 @@
   <img src=".github/assets/film-apps.png" width="100%" alt="The Omarchy bar with Spaces: five workspaces, each showing the app icons open on it" />
 </p>
 
-Spaces is a workspace switcher for the [Omarchy](https://omarchy.org) bar. Each workspace shows the icons of the apps open on it. The active one slides open, and the focused window is highlighted.
+Voyagen Spaces is a customized fork of [Tornike Gomareli's Spaces](https://github.com/tornikegomareli/omarchy-spaces), a workspace switcher for the [Omarchy](https://omarchy.org) bar. Each workspace shows the icons of the apps open on it. The active one slides open, and the focused window is highlighted.
 
 ## Peek before you jump
 
@@ -29,21 +29,21 @@ To turn it on, add these hooks to `~/.claude/settings.json`:
 ```json
 {
   "hooks": {
-    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/tornikegomareli.spaces/hooks/claude-hook working", "async": true }] }],
-    "PostToolUse": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/tornikegomareli.spaces/hooks/claude-hook working", "async": true }] }],
-    "Notification": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/tornikegomareli.spaces/hooks/claude-hook waiting", "async": true }] }],
-    "Stop": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/tornikegomareli.spaces/hooks/claude-hook done", "async": true }] }],
-    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/tornikegomareli.spaces/hooks/claude-hook end", "async": true }] }]
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/voyagen.spaces/hooks/claude-hook working", "async": true }] }],
+    "PostToolUse": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/voyagen.spaces/hooks/claude-hook working", "async": true }] }],
+    "Notification": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/voyagen.spaces/hooks/claude-hook waiting", "async": true }] }],
+    "Stop": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/voyagen.spaces/hooks/claude-hook done", "async": true }] }],
+    "SessionEnd": [{ "hooks": [{ "type": "command", "command": "~/.config/omarchy/plugins/voyagen.spaces/hooks/claude-hook end", "async": true }] }]
   }
 }
 ```
 
-Other agents can report the same way: `omarchy-shell tornikegomareli.spaces agent <session> <working|waiting|done|end> <pids>`, where `<pids>` lists the agent's process and its parents, comma-separated.
+Other agents can report the same way: `omarchy-shell voyagen.spaces agent <session> <working|waiting|done|end> <pids>`, where `<pids>` lists the agent's process and its parents, comma-separated.
 
 ## Install
 
 ```sh
-omarchy plugin add https://github.com/tornikegomareli/omarchy-spaces.git --enable
+omarchy plugin add https://github.com/voyagen/omarchy-spaces.git --enable
 omarchy plugin disable omarchy.workspaces   # optional: replace the built-in switcher
 ```
 
@@ -58,14 +58,14 @@ Works with the bar on any edge of the screen. Tested on a single monitor.
 To update, then load the new code:
 
 ```sh
-omarchy plugin update tornikegomareli.spaces
+omarchy plugin update voyagen.spaces
 omarchy restart shell
 ```
 
 ## Remove
 
 ```sh
-omarchy plugin remove tornikegomareli.spaces
+omarchy plugin remove voyagen.spaces
 omarchy plugin enable omarchy.workspaces   # bring back the built-in switcher
 ```
 
@@ -88,19 +88,19 @@ Choose when icons show (always, active, on hover, or never), icon style and size
 To open settings with a key, add this to `~/.config/hypr/bindings.lua`:
 
 ```lua
-o.bind("SUPER + CTRL + ALT + S", "Spaces settings", "omarchy-shell tornikegomareli.spaces toggle")
+o.bind("SUPER + CTRL + ALT + S", "Voyagen Spaces settings", "omarchy-shell voyagen.spaces toggle")
 ```
 
 To preview a workspace from a key or script, without hovering:
 
 ```sh
-omarchy-shell tornikegomareli.spaces peek 3
+omarchy-shell voyagen.spaces peek 3
 ```
 
 Settings can also be set from a script:
 
 ```sh
-omarchy bar set tornikegomareli.spaces showApps all
+omarchy bar set voyagen.spaces showApps all
 ```
 
 <br clear="right" />
@@ -110,8 +110,8 @@ omarchy bar set tornikegomareli.spaces showApps all
 From a clone of this repository, link it into Omarchy and run the tests:
 
 ```sh
-ln -sfn "$PWD" ~/.config/omarchy/plugins/tornikegomareli.spaces
-omarchy plugin enable tornikegomareli.spaces
+ln -sfn "$PWD" ~/.config/omarchy/plugins/voyagen.spaces
+omarchy plugin enable voyagen.spaces
 node tests/model.test.js
 ```
 

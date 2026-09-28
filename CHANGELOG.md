@@ -1,5 +1,10 @@
 # Changelog
 
+## Fork customization
+
+- Renamed the plugin to Voyagen Spaces and assigned it the `voyagen.spaces` ID.
+- Updated widget IPC, agent hook, and installation instructions to use the new ID.
+
 ## 1.0.0
 
 First stable release, ready for the Omarchy plugin marketplace.
