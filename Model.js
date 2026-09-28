@@ -214,6 +214,11 @@ function composeActivityLabel(topics) {
   return parts.join(" + ") + overflow
 }
 
+function taskTopic(task, proposed) {
+  if (!task || String(proposed || "").trim().split(/\s+/).length > 1) return proposed
+  return String(task).trim().split(/\s+/).slice(0, 3).join(" ")
+}
+
 // Installed-app categories provide a label before or without Ollama;
 // its contextual name can replace them when titles have more detail.
 var APP_CATEGORIES = {
@@ -518,6 +523,7 @@ if (typeof module !== "undefined") {
     workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceApps: workspaceApps,
     workspaceTitle: workspaceTitle, workspaceActivities: workspaceActivities,
     workspaceSignature: workspaceSignature, composeActivityLabel: composeActivityLabel,
+    taskTopic: taskTopic,
     categoryForApps: categoryForApps, parseWorkspaceName: parseWorkspaceName,
     contextName: contextName,
     appKey: appKey,

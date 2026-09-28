@@ -102,6 +102,9 @@ test("Herdr task takes precedence over project, with project fallback", () => {
   const idle = M.workspaceActivities(window, { 55: { app: "Herdr", task: "", project: "oma-smartspaces" } })
   assert.strictEqual(idle[0].task, "")
   assert.strictEqual(idle[0].project, "oma-smartspaces")
+  assert.strictEqual(M.taskTopic(working[0].task, "Smartspaces"), "Troubleshoot Widget")
+  assert.strictEqual(M.taskTopic("Add Gradient Bar Plugin Preview Image", "gradient"), "Add Gradient Bar")
+  assert.strictEqual(M.taskTopic(working[0].task, "Fix Widget"), "Fix Widget")
 })
 
 test("known application combinations prefer specific broad categories", () => {

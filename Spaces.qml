@@ -351,6 +351,8 @@ Panel {
         var key = JSON.stringify(activity)
         var appName = root.appInfo(activity.appId).name
         var fallback = Model.categoryForApps([appName]) || appName.slice(0, 24)
+        if (activity.task) fallback = Model.taskTopic(activity.task, "")
+        else if (activity.project) fallback = activity.project
         if (key in aiTopics) topics.push(aiTopics[key])
         else {
           topics.push(fallback)
@@ -377,7 +379,8 @@ Panel {
       if (request.status === 200) {
         try {
           var response = JSON.parse(request.responseText)
-          topic = Model.contextName(fallback, Model.parseWorkspaceName(response.response || ""))
+          topic = Model.taskTopic(activity.task,
+            Model.contextName(fallback, Model.parseWorkspaceName(response.response || "")))
         } catch (error) {
           // Keep the app category when the local model returns invalid JSON.
         }
