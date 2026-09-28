@@ -265,7 +265,7 @@ function parseWorkspaceName(text) {
 }
 
 function contextName(fallback, proposed) {
-  if (!proposed || /^(browser|terminal|workspace|x11|youtube)$/i.test(proposed))
+  if (!proposed || /^(browser|terminal|workspace|x11|youtube|watch(?: video)?)$/i.test(proposed))
     return fallback || (/^(browser|terminal)$/i.test(proposed) ? proposed : "")
   return proposed
 }

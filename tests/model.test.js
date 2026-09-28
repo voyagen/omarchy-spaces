@@ -131,6 +131,7 @@ test("generic model names fall back to the known app category", () => {
   assert.strictEqual(M.contextName("Browser", "Terminal"), "Browser")
   assert.strictEqual(M.contextName("Chat", "workspace"), "Chat")
   assert.strictEqual(M.contextName("Browser", "YouTube"), "Browser")
+  assert.strictEqual(M.contextName("Browser", "Watch Video"), "Browser")
   assert.strictEqual(M.contextName("Browser", ""), "Browser")
   assert.strictEqual(M.contextName("", "Music Editing"), "Music Editing")
 })
