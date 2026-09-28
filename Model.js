@@ -17,7 +17,7 @@ var DEFAULTS = {
   focusedTitle: false,        // show the focused window's title next to its icon
   titleLength: 24,
   activeStyle: "subtle",      // "subtle" | "solid" | "accent"
-  labelStyle: "number",       // "number" | "glyph" | "none"
+  labelStyle: "number",       // "number" (Chinese numerals) | "glyph" | "none"
   animations: true,
   animationSpeed: "normal",   // "slow" | "normal" | "fast"
   scrollSwitch: true,
@@ -142,11 +142,12 @@ function workspaceIds(occupied, activeIds, persistent, hideEmpty) {
   return ids
 }
 
-// Label text for a workspace pill.
+// Label text for a workspace pill. The built-in workspace range is 1–10.
+var WORKSPACE_NUMERALS = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
 function workspaceLabel(id, focused, style) {
   if (style === "none") return ""
   if (style === "glyph" && focused) return "󱓻"
-  return id === 10 ? "0" : String(id)
+  return WORKSPACE_NUMERALS[id - 1] || String(id)
 }
 
 // Stable key identifying "the same app" across windows.

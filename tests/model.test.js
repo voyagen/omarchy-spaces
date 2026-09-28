@@ -29,11 +29,12 @@ test("workspaceIds hideEmpty keeps only occupied and active", () => {
   assert.deepStrictEqual(M.workspaceIds({ 1: 0, 4: 1 }, [2], 5, true), [2, 4])
 })
 
-test("workspaceLabel", () => {
-  assert.strictEqual(M.workspaceLabel(10, false, "number"), "0")
+test("workspace labels use Chinese numerals without changing glyph and none modes", () => {
+  const labels = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+  assert.deepStrictEqual(labels.map((_, i) => M.workspaceLabel(i + 1, false, "number")), labels)
   assert.strictEqual(M.workspaceLabel(3, true, "none"), "")
-  assert.notStrictEqual(M.workspaceLabel(3, true, "glyph"), "3")
-  assert.strictEqual(M.workspaceLabel(3, false, "glyph"), "3")
+  assert.strictEqual(M.workspaceLabel(3, true, "glyph"), "󱓻")
+  assert.strictEqual(M.workspaceLabel(3, false, "glyph"), "三")
 })
 
 test("sortWindows orders by x then y, unknown last", () => {

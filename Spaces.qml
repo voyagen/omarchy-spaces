@@ -1389,7 +1389,7 @@ Panel {
             title: "WORKSPACE LABEL"
             key: "labelStyle"
             options: [
-              { value: "number", label: "Number" },
+              { value: "number", label: "Chinese numerals" },
               { value: "glyph", label: "Glyph" },
               { value: "none", label: "None" }
             ]
