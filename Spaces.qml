@@ -245,15 +245,27 @@ Panel {
   // Ollama is optional. Names are ephemeral and never written to shell.json.
   property var aiLabels: ({})
   property var aiSignatures: ({})
-  onWorkspaceMapChanged: if (cfg.aiNames) aiDebounce.restart()
+  property string aiMapFingerprint: ""
+  onWorkspaceMapChanged: root.scheduleAiNames()
   onCfgChanged: {
     if (!cfg.aiNames) {
       aiLabels = ({})
       aiSignatures = ({})
+      aiMapFingerprint = ""
       aiDebounce.stop()
     } else {
-      aiDebounce.restart()
+      root.scheduleAiNames()
     }
+  }
+
+  function scheduleAiNames() {
+    if (!cfg.aiNames) return
+    var fingerprint = ""
+    for (var id in workspaceMap)
+      fingerprint += id + ":" + Model.workspaceSignature(workspaceMap[id].windows) + "\n"
+    if (fingerprint === aiMapFingerprint) return
+    aiMapFingerprint = fingerprint
+    aiDebounce.restart()
   }
 
   Timer {
@@ -505,6 +517,7 @@ Panel {
     DesktopEntries.applications.values
     iconScan.running = true
     Hyprland.refreshToplevels()
+    root.scheduleAiNames()
   }
 
   // ------------------------------------------------------------ previews
