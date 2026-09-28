@@ -293,14 +293,14 @@ Panel {
         var context = windows.slice(0, 8).map(function(w) {
           return { app: root.appInfo(w.appId).name.slice(0, 60), title: Model.workspaceTitle(w.title) }
         })
-        requestAiName(id, signature, context)
+        requestAiName(id, signature, context, category)
       }
     }
     aiSignatures = signatures
     aiLabels = labels
   }
 
-  function requestAiName(id, signature, context) {
+  function requestAiName(id, signature, context, fallback) {
     var request = new XMLHttpRequest()
     request.open("POST", "http://127.0.0.1:11434/api/generate", true)
     request.setRequestHeader("Content-Type", "application/json")
@@ -309,8 +309,8 @@ Panel {
           root.aiSignatures[id] !== signature || request.status !== 200) return
       try {
         var response = JSON.parse(request.responseText)
-        var name = Model.parseAiCategory(response.response || "")
-        if (!name) return
+        var name = Model.refineCategory(fallback, Model.parseAiCategory(response.response || ""))
+        if (!name || name === root.aiLabels[id]) return
         var next = Object.assign({}, root.aiLabels)
         next[id] = name
         root.aiLabels = next

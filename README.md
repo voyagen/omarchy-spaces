@@ -91,7 +91,7 @@ Workspace numbers 1–10 display as 一 二 三 四 五 六 七 八 九 十. The
 
 Install Ollama and download `qwen3:1.7b` once with `ollama pull qwen3:1.7b`. In Spaces settings, turn on **Automatic workspace categories** (off by default). Occupied workspaces show **Chinese numeral → app icons → category title**, such as `一 [icons] Development`. Empty workspaces keep their numerals.
 
-Known applications get an immediate category; local Ollama can refine it using the window titles. It chooses from Development, Browser, Movie, Audio, Music, Chat, Gaming, Design, Writing, Office, Photos, Files, System, and Terminal. If the model is unavailable or returns an invalid category, the known-app category remains; otherwise the workspace keeps its numeral.
+Known applications get an immediate category; local Ollama can refine Browser and Terminal using window titles, while dedicated-app categories such as Music or Chat stay stable. It chooses from Development, Browser, Movie, Audio, Music, Chat, Gaming, Design, Writing, Office, Photos, Files, System, and Terminal. If the model is unavailable or returns an invalid category, the known-app category remains; otherwise the workspace keeps its numeral.
 
 | Applications (without a more specific title) | Initial category |
 | --- | --- |

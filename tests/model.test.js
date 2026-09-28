@@ -72,6 +72,16 @@ test("AI category accepts only named broad categories", () => {
   assert.strictEqual(M.parseAiCategory('Research'), "")
 })
 
+test("category refinement does not let a generic model answer override a stronger app", () => {
+  assert.strictEqual(M.refineCategory("Browser", "Terminal"), "Browser")
+  assert.strictEqual(M.refineCategory("Terminal", "Browser"), "Terminal")
+  assert.strictEqual(M.refineCategory("Chat", "Terminal"), "Chat")
+  assert.strictEqual(M.refineCategory("Browser", "Movie"), "Movie")
+  assert.strictEqual(M.refineCategory("Terminal", "Development"), "Development")
+  assert.strictEqual(M.refineCategory("Browser", ""), "Browser")
+  assert.strictEqual(M.refineCategory("", "Music"), "Music")
+})
+
 test("sortWindows orders by x then y, unknown last", () => {
   const w = [{ id: "a", at: [500, 0] }, { id: "b" }, { id: "c", at: [10, 300] }, { id: "d", at: [10, 5] }]
   assert.deepStrictEqual(M.sortWindows(w).map(x => x.id), ["d", "c", "a", "b"])

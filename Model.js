@@ -225,6 +225,16 @@ function parseAiCategory(text) {
   }
 }
 
+// A tiny model can mistake a browser+terminal workspace for "Terminal".
+// Keep the app-based category unless titles justify a more specific one.
+function refineCategory(fallback, proposed) {
+  if (!proposed) return fallback
+  if (fallback && fallback !== "Browser" && fallback !== "Terminal") return fallback
+  if (fallback === "Browser" && proposed === "Terminal") return fallback
+  if (fallback === "Terminal" && proposed === "Browser") return fallback
+  return proposed
+}
+
 // Stable key identifying "the same app" across windows.
 function appKey(appId) {
   return String(appId || "").toLowerCase()
@@ -473,6 +483,7 @@ if (typeof module !== "undefined") {
     workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceApps: workspaceApps,
     workspaceTitle: workspaceTitle, workspaceSignature: workspaceSignature,
     AI_CATEGORIES: AI_CATEGORIES, categoryForApps: categoryForApps, parseAiCategory: parseAiCategory,
+    refineCategory: refineCategory,
     appKey: appKey,
     sortWindows: sortWindows, iconItems: iconItems, truncate: truncate,
     focusedLabel: focusedLabel, webAppHost: webAppHost, appIdCandidates: appIdCandidates, iconPathScore: iconPathScore,
