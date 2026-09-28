@@ -6,6 +6,7 @@
 - Updated widget IPC, agent hook, and installation instructions to use the new ID.
 - Workspace labels 1–10 now use Chinese numerals instead of Western digits.
 - Added opt-in local Ollama naming for occupied workspaces, with numeral fallback.
+- AI naming now uses application names only; window titles are neither sent to Ollama nor used to trigger renaming.
 
 ## 1.0.0
 

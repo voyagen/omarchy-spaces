@@ -152,16 +152,19 @@ function workspaceLabel(id, focused, style) {
   return WORKSPACE_NUMERALS[id - 1] || String(id)
 }
 
-// Animated terminal-title spinners are not changes of workspace activity.
-function workspaceTitle(title) {
-  return String(title || "").replace(/[\u2800-\u28ff]/g, "").trim().slice(0, 120)
+// The app set is stable across title changes, focus changes, and extra windows
+// of the same app; no window titles enter the AI naming path.
+function workspaceApps(windows) {
+  var apps = []
+  for (var i = 0; i < windows.length; i++) {
+    var app = String(windows[i].appId || "")
+    if (app && apps.indexOf(app) === -1) apps.push(app)
+  }
+  return apps.sort()
 }
 
-// Ignore focus and window ordering: neither changes what a workspace contains.
 function workspaceSignature(windows) {
-  return windows.map(function(w) {
-    return [w.appId || "", workspaceTitle(w.title)].join(":")
-  }).sort().join("\n")
+  return workspaceApps(windows).join("\n")
 }
 
 function namedWorkspaceLabel(id, focused, style, aiNames, name) {
@@ -415,7 +418,7 @@ if (typeof module !== "undefined") {
     densityMetrics: densityMetrics, normalizeAddress: normalizeAddress,
     agentStates: agentStates, parsePids: parsePids,
     previewWidth: previewWidth, monitorArea: monitorArea, previewLayout: previewLayout, durationFor: durationFor,
-    workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceTitle: workspaceTitle,
+    workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceApps: workspaceApps,
     workspaceSignature: workspaceSignature,
     namedWorkspaceLabel: namedWorkspaceLabel, appKey: appKey,
     sortWindows: sortWindows, iconItems: iconItems, truncate: truncate,

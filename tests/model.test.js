@@ -47,15 +47,16 @@ test("AI labels preserve workspace identifiers and honor the switch", () => {
   assert.strictEqual(M.resolveSettings({ aiNames: "true" }).aiNames, false)
 })
 
-test("workspace signature changes with content, not focus or window order", () => {
+test("AI workspace context depends on apps, not window titles or focus", () => {
   const windows = [{ appId: "firefox", title: "Research", focused: true },
-                   { appId: "foot", title: "notes", focused: false }]
+                   { appId: "foot", title: "notes", focused: false },
+                   { appId: "foot", title: "another document", focused: false }]
+  assert.deepStrictEqual(M.workspaceApps(windows), ["firefox", "foot"])
   const signature = M.workspaceSignature(windows)
-  assert.strictEqual(M.workspaceSignature(windows.slice().reverse().map(w => ({ ...w, focused: !w.focused }))), signature)
-  assert.strictEqual(M.workspaceSignature([{ appId: "firefox", title: "Research" },
-    { appId: "foot", title: "⠋ notes" }]), M.workspaceSignature([{ appId: "foot", title: "⠙ notes" }, windows[0]]))
-  assert.notStrictEqual(M.workspaceSignature([{ appId: "firefox", title: "Inbox" }, windows[1]]), signature)
+  assert.strictEqual(M.workspaceSignature(windows.slice().reverse().map(w => ({ ...w, title: "Private message", focused: !w.focused }))), signature)
+  assert.strictEqual(M.workspaceSignature(windows.concat({ appId: "foot", title: "More notes" })), signature)
   assert.notStrictEqual(M.workspaceSignature([windows[0]]), signature)
+  assert.notStrictEqual(M.workspaceSignature([{ appId: "firefox" }, { appId: "music" }]), signature)
 })
 
 test("sortWindows orders by x then y, unknown last", () => {
