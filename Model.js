@@ -152,10 +152,15 @@ function workspaceLabel(id, focused, style) {
   return WORKSPACE_NUMERALS[id - 1] || String(id)
 }
 
+// Animated terminal-title spinners are not changes of workspace activity.
+function workspaceTitle(title) {
+  return String(title || "").replace(/[\u2800-\u28ff]/g, "").trim().slice(0, 120)
+}
+
 // Ignore focus and window ordering: neither changes what a workspace contains.
 function workspaceSignature(windows) {
   return windows.map(function(w) {
-    return [w.appId || "", String(w.title || "").slice(0, 120)].join(":")
+    return [w.appId || "", workspaceTitle(w.title)].join(":")
   }).sort().join("\n")
 }
 
@@ -410,7 +415,8 @@ if (typeof module !== "undefined") {
     densityMetrics: densityMetrics, normalizeAddress: normalizeAddress,
     agentStates: agentStates, parsePids: parsePids,
     previewWidth: previewWidth, monitorArea: monitorArea, previewLayout: previewLayout, durationFor: durationFor,
-    workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceSignature: workspaceSignature,
+    workspaceIds: workspaceIds, workspaceLabel: workspaceLabel, workspaceTitle: workspaceTitle,
+    workspaceSignature: workspaceSignature,
     namedWorkspaceLabel: namedWorkspaceLabel, appKey: appKey,
     sortWindows: sortWindows, iconItems: iconItems, truncate: truncate,
     focusedLabel: focusedLabel, webAppHost: webAppHost, appIdCandidates: appIdCandidates, iconPathScore: iconPathScore,

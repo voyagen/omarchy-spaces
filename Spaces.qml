@@ -295,7 +295,7 @@ Panel {
 
   function requestAiName(id, signature, windows) {
     var context = windows.slice(0, 8).map(function(w) {
-      return { app: String(w.appId || "").slice(0, 60), title: String(w.title || "").slice(0, 120) }
+      return { app: String(w.appId || "").slice(0, 60), title: Model.workspaceTitle(w.title) }
     })
     var request = new XMLHttpRequest()
     request.open("POST", "http://127.0.0.1:11434/api/generate", true)

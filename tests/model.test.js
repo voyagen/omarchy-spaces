@@ -52,6 +52,8 @@ test("workspace signature changes with content, not focus or window order", () =
                    { appId: "foot", title: "notes", focused: false }]
   const signature = M.workspaceSignature(windows)
   assert.strictEqual(M.workspaceSignature(windows.slice().reverse().map(w => ({ ...w, focused: !w.focused }))), signature)
+  assert.strictEqual(M.workspaceSignature([{ appId: "firefox", title: "Research" },
+    { appId: "foot", title: "⠋ notes" }]), M.workspaceSignature([{ appId: "foot", title: "⠙ notes" }, windows[0]]))
   assert.notStrictEqual(M.workspaceSignature([{ appId: "firefox", title: "Inbox" }, windows[1]]), signature)
   assert.notStrictEqual(M.workspaceSignature([windows[0]]), signature)
 })
