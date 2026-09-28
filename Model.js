@@ -22,7 +22,7 @@ var DEFAULTS = {
   animations: true,
   animationSpeed: "normal",   // "slow" | "normal" | "fast"
   scrollSwitch: true,
-  iconStyle: "color",         // "color" | "mono"
+  iconStyle: "color",         // "color" | "mono" | "activeColor"
   urgentHighlight: true,      // pulse workspaces whose windows ask for attention
   middleClickClose: false,    // middle-click an icon closes that window
   tooltips: true,
@@ -36,7 +36,7 @@ var DEFAULTS = {
 }
 
 var SHOW_APPS = ["all", "active", "hover", "hoverOnly"]
-var ICON_STYLES = ["color", "mono"]
+var ICON_STYLES = ["color", "mono", "activeColor"]
 var DENSITIES = ["compact", "normal", "roomy"]
 var ACTIVE_CLICKS = ["none", "previous"]
 var SETTINGS_BUTTONS = ["hover", "always", "never"]

@@ -83,7 +83,7 @@ If you added the agent hooks or the settings key below, delete those lines from 
 
 <img src=".github/assets/settings.png" width="330" align="right" alt="Spaces settings panel" />
 
-Choose when icons show (always, active, on hover, or never), icon style and size, grouping by app, previews, agent status, the active workspace style, density, and more. Settings are saved to `~/.config/omarchy/shell.json`.
+Choose when icons show (always, active, on hover, or never), icon style and size, grouping by app, previews, agent status, the active workspace style, density, and more. **Active color** keeps icons on the active workspace in color and makes icons on inactive workspaces monochrome. Settings are saved to `~/.config/omarchy/shell.json`.
 
 Workspace numbers 1–10 display as 一 二 三 四 五 六 七 八 九 十. The “Glyph” setting replaces the active workspace's numeral with a glyph.
 

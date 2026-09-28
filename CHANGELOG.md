@@ -2,6 +2,7 @@
 
 ## Fork customization
 
+- Added an Active color icon style: active workspace icons stay in color; inactive workspace icons are monochrome.
 - Renamed the plugin to Voyagen Spaces and assigned it the `voyagen.spaces` ID.
 - Updated widget IPC, agent hook, and installation instructions to use the new ID.
 - Workspace labels 1–10 now use Chinese numerals instead of Western digits.

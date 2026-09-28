@@ -929,7 +929,7 @@ Panel {
                         asynchronous: true
                         visible: status === Image.Ready
                         opacity: appIcon.dim
-                        layer.enabled: root.cfg.iconStyle === "mono"
+                        layer.enabled: root.cfg.iconStyle === "mono" || (root.cfg.iconStyle === "activeColor" && !pill.active)
                         layer.effect: MultiEffect { saturation: -1.0 }
                       }
 
@@ -1501,7 +1501,8 @@ Panel {
             key: "iconStyle"
             options: [
               { value: "color", label: "Color" },
-              { value: "mono", label: "Monochrome" }
+              { value: "mono", label: "Monochrome" },
+              { value: "activeColor", label: "Active color" }
             ]
           }
 

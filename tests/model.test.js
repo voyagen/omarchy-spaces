@@ -207,6 +207,7 @@ test("new settings validate", () => {
   const s = M.resolveSettings({ density: "huge", iconStyle: "mono", activeClick: "previous", settingsButton: "x" })
   assert.strictEqual(s.density, "normal")
   assert.strictEqual(s.iconStyle, "mono")
+  assert.strictEqual(M.resolveSettings({ iconStyle: "activeColor" }).iconStyle, "activeColor")
   assert.strictEqual(s.activeClick, "previous")
   assert.strictEqual(s.settingsButton, "hover")
   assert.strictEqual(s.showIcons, true)
